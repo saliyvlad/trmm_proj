@@ -12,7 +12,7 @@ void trmm_d(Side side, Uplo uplo, Trans trans, Diag diag,
             for (size_t k = 0; k < m; ++k) {
                 double b_val = B[k + j * ldb];
                 for (size_t i = 0; i < k; ++i) {
-                    B[i + j * ldb] -= A[i + k * lda] * b_val;
+                    B[i + j * ldb] += A[i + k * lda] * b_val;
                 }
                 
                 double a_kk = (diag == Diag::Unit) ? 1.0 : A[k + k * lda];
