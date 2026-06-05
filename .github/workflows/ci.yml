@@ -2,11 +2,9 @@ name: TRMM CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build-and-test:
@@ -37,9 +35,9 @@ jobs:
     - name: Run tests
       run: |
         cd build
-        ./test_trmm
+        ctest --output-on-failure
 
     - name: Run benchmark
       run: |
         cd build
-        ./bench_trmm
+        ./benchmark
