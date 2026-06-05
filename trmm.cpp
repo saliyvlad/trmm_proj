@@ -1,7 +1,7 @@
 #include "trmm.hpp"
 #include <omp.h>
 #include <iostream> 
-void trmm_dd(Side side, Uplo uplo, Trans trans, Diag diag,
+void trmm_d(Side side, Uplo uplo, Trans trans, Diag diag,
             size_t m, size_t n, double alpha,
             const double* A, size_t lda, double* B, size_t ldb) {
     
