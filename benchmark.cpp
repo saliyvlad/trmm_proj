@@ -131,8 +131,8 @@ public:
 
 int main() {
     TRMMBenchmark benchmark;
-    size_t m = 2000;
-    size_t n = 2000;
+    size_t m = 256;
+    size_t n = 256;
     int iterations = 10;
     
     std::cout << "TRMM Performance Benchmark\n";
