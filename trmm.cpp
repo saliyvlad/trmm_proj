@@ -38,10 +38,10 @@ void trmm_s(Side side, Uplo uplo, Trans trans, Diag diag,
             for (size_t k = 0; k < m; ++k) {
                 float b_val = B[k + j * ldb];
                 for (size_t i = 0; i < k; ++i) {
-                    B[i + j * ldb] -= A[i + k * lda] * b_val;
+                    B[i + j * ldb] += A[i + k * lda] * b_val;
                 }
                 float a_kk = (diag == Diag::Unit) ? 1.0f : A[k + k * lda];
-                B[k + j * ldb] *= a_kk;
+                B[k + j * ldb] += a_kk;
             }
             if (alpha != 1.0f) {
                 for (size_t i = 0; i < m; ++i) B[i + j * ldb] *= alpha;
