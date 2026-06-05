@@ -6,17 +6,14 @@
 #include <cmath>
 #include <iomanip>
 #include <cblas.h>
-
 #ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
 #endif
-
 class TRMMBenchmark {
 private:
     std::mt19937 rng;
     std::uniform_real_distribution<double> dist;
-    
 public:
     TRMMBenchmark() : rng(42), dist(-1.0, 1.0) {}
     
@@ -49,13 +46,12 @@ public:
                        size_t m, size_t n, int num_threads, int iterations = 10) {
         std::vector<T> A(m * m);
         std::vector<T> B(m * n);
-        
         initMatrix(A, m, m, true);
         initMatrix(B, m, n);
         
-        
+        // Warmup run
         trmm_func(Side::Left, Uplo::Upper, Trans::None, Diag::NonUnit,
-                  m, n, T(1.0), A.data(), m, B.data(), m, num_threads);
+                 m, n, T(1.0), A.data(), m, B.data(), m, num_threads);
         
 #ifdef _WIN32
         LARGE_INTEGER frequency, start, end;
@@ -68,7 +64,7 @@ public:
         for (int i = 0; i < iterations; ++i) {
             initMatrix(B, m, n);
             trmm_func(Side::Left, Uplo::Upper, Trans::None, Diag::NonUnit,
-                      m, n, T(1.0), A.data(), m, B.data(), m, num_threads);
+                     m, n, T(1.0), A.data(), m, B.data(), m, num_threads);
         }
         
 #ifdef _WIN32
@@ -79,14 +75,13 @@ public:
         std::chrono::duration<double> elapsed = end - start;
 #endif
         
-        return elapsed / iterations;
+        return elapsed.count() / iterations;  // ИСПРАВЛЕНО: добавлен .count()
     }
     
     template<typename T>
     double runOpenBLASBenchmark(size_t m, size_t n, int iterations = 10) {
         std::vector<T> A(m * m);
         std::vector<T> B(m * n);
-        
         initMatrix(A, m, m, true);
         initMatrix(B, m, n);
         
@@ -96,10 +91,10 @@ public:
         CBLAS_DIAG diag = CblasNonUnit;
         
         if constexpr (std::is_same<T, float>::value) {
-            cblas_strmm(CblasColMajor, side, uplo, trans, diag, m, n, 1.0f, 
+            cblas_strmm(CblasColMajor, side, uplo, trans, diag, m, n, 1.0f,
                        A.data(), m, B.data(), m);
         } else {
-            cblas_dtrmm(CblasColMajor, side, uplo, trans, diag, m, n, 1.0, 
+            cblas_dtrmm(CblasColMajor, side, uplo, trans, diag, m, n, 1.0,
                        A.data(), m, B.data(), m);
         }
         
@@ -114,10 +109,10 @@ public:
         for (int i = 0; i < iterations; ++i) {
             initMatrix(B, m, n);
             if constexpr (std::is_same<T, float>::value) {
-                cblas_strmm(CblasColMajor, side, uplo, trans, diag, m, n, 1.0f, 
+                cblas_strmm(CblasColMajor, side, uplo, trans, diag, m, n, 1.0f,
                            A.data(), m, B.data(), m);
             } else {
-                cblas_dtrmm(CblasColMajor, side, uplo, trans, diag, m, n, 1.0, 
+                cblas_dtrmm(CblasColMajor, side, uplo, trans, diag, m, n, 1.0,
                            A.data(), m, B.data(), m);
             }
         }
@@ -130,31 +125,29 @@ public:
         std::chrono::duration<double> elapsed = end - start;
 #endif
         
-        return elapsed / iterations;
+        return elapsed.count() / iterations;  // ИСПРАВЛЕНО: добавлен .count()
     }
 };
 
 int main() {
     TRMMBenchmark benchmark;
-    
     size_t m = 2000;
     size_t n = 2000;
     int iterations = 10;
     
     std::cout << "TRMM Performance Benchmark\n";
-    std::cout << "==========================\n\n";
+    std::cout << "==========================\n";
     std::cout << "Matrix size: " << m << " x " << n << "\n";
-    std::cout << "Iterations: " << iterations << "\n\n";
+    std::cout << "Iterations: " << iterations << "\n";
     
     std::vector<int> threads = {1, 2, 4, 8, 16};
-    
     std::cout << std::fixed << std::setprecision(6);
     
-    std::cout << "SINGLE PRECISION (float)\n";
+    std::cout << "\nSINGLE PRECISION (float)\n";
     std::cout << "------------------------\n";
-    std::cout << std::setw(10) << "Threads" 
-              << std::setw(15) << "Time (s)" 
-              << std::setw(15) << "OpenBLAS (s)" 
+    std::cout << std::setw(10) << "Threads"
+              << std::setw(15) << "Time (s)"
+              << std::setw(15) << "OpenBLAS (s)"
               << std::setw(15) << "Performance %" << "\n";
     std::cout << std::string(55, '-') << "\n";
     
@@ -163,19 +156,17 @@ int main() {
         double openblas_time = benchmark.runOpenBLASBenchmark<float>(m, n, iterations);
         double perf = (openblas_time / my_time) * 100.0;
         
-        std::cout << std::setw(10) << t 
-                  << std::setw(15) << my_time 
-                  << std::setw(15) << openblas_time 
+        std::cout << std::setw(10) << t
+                  << std::setw(15) << my_time
+                  << std::setw(15) << openblas_time
                   << std::setw(14) << perf << "%\n";
     }
     
-    std::cout << "\n";
-    
-    std::cout << "DOUBLE PRECISION (double)\n";
+    std::cout << "\nDOUBLE PRECISION (double)\n";
     std::cout << "-------------------------\n";
-    std::cout << std::setw(10) << "Threads" 
-              << std::setw(15) << "Time (s)" 
-              << std::setw(15) << "OpenBLAS (s)" 
+    std::cout << std::setw(10) << "Threads"
+              << std::setw(15) << "Time (s)"
+              << std::setw(15) << "OpenBLAS (s)"
               << std::setw(15) << "Performance %" << "\n";
     std::cout << std::string(55, '-') << "\n";
     
@@ -184,13 +175,12 @@ int main() {
         double openblas_time = benchmark.runOpenBLASBenchmark<double>(m, n, iterations);
         double perf = (openblas_time / my_time) * 100.0;
         
-        std::cout << std::setw(10) << t 
-                  << std::setw(15) << my_time 
-                  << std::setw(15) << openblas_time 
+        std::cout << std::setw(10) << t
+                  << std::setw(15) << my_time
+                  << std::setw(15) << openblas_time
                   << std::setw(14) << perf << "%\n";
     }
     
     std::cout << "\nBenchmark completed successfully!\n";
-    
     return 0;
 }
